@@ -19,6 +19,9 @@ prune libsodium-stable/.github
 exclude libsodium-stable/.git*
 
 prune libsodium-stable/test
+# configure and make still need the test Makefiles
+include libsodium-stable/test/Makefile.am libsodium-stable/test/Makefile.in
+include libsodium-stable/test/default/Makefile.am libsodium-stable/test/default/Makefile.in
 
 prune tests
 
