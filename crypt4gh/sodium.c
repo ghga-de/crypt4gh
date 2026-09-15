@@ -14,8 +14,9 @@ crypt4gh_chacha20poly1305_encrypt(PyObject* self, PyObject* args)
 {
     PyObject *ciphersegment_obj, *segment_obj, *key_obj;
     uint8_t *ciphersegment, *segment, *key;
-    Py_ssize_t ciphersegment_len, segment_len; //, key_len;
+    Py_ssize_t ciphersegment_len, segment_len, key_len;
     unsigned long long clen;
+    int rc;
     PyObject* ret;
     Py_buffer ciphersegment_view, segment_view, key_view;
 
@@ -53,19 +54,28 @@ crypt4gh_chacha20poly1305_encrypt(PyObject* self, PyObject* args)
     segment = (uint8_t *)segment_view.buf;
     segment_len = segment_view.len;
     key = (uint8_t *)key_view.buf;
-    //key_len = key_view.len;
+    key_len = key_view.len;
 
     if (ciphersegment_len < segment_len + CIPHER_DIFF) {
       PyErr_SetString(PyExc_AssertionError, "Invalid buffer sizes");
       goto bailout;
     }
 
-    randombytes_buf(ciphersegment, NONCE_LEN);
+    if (key_len != crypto_aead_chacha20poly1305_ietf_KEYBYTES) {
+      PyErr_SetString(PyExc_ValueError, "Invalid key size");
+      goto bailout;
+    }
 
-    if(crypto_aead_chacha20poly1305_ietf_encrypt(ciphersegment + NONCE_LEN, &clen,
+    /* The buffer views keep the buffers alive and unresizable while the GIL is released */
+    Py_BEGIN_ALLOW_THREADS
+    randombytes_buf(ciphersegment, NONCE_LEN);
+    rc = crypto_aead_chacha20poly1305_ietf_encrypt(ciphersegment + NONCE_LEN, &clen,
 						 segment, segment_len,
 						 NULL, 0, NULL,
-						 ciphersegment, key) != 0){
+						 ciphersegment, key);
+    Py_END_ALLOW_THREADS
+
+    if(rc != 0){
       PyErr_SetString(PyExc_ValueError, "Segment encryption failed");
       goto bailout;
     }
@@ -85,8 +95,9 @@ crypt4gh_chacha20poly1305_decrypt(PyObject* self, PyObject* args)
 {
     PyObject *ciphersegment_obj, *segment_obj, *key_obj;
     uint8_t *ciphersegment, *segment, *key;
-    Py_ssize_t ciphersegment_len, segment_len; //, key_len;
+    Py_ssize_t ciphersegment_len, segment_len, key_len;
     unsigned long long slen;
+    int rc;
     PyObject* ret;
     Py_buffer ciphersegment_view, segment_view, key_view;
 
@@ -124,7 +135,7 @@ crypt4gh_chacha20poly1305_decrypt(PyObject* self, PyObject* args)
     segment = (uint8_t *)segment_view.buf;
     segment_len = segment_view.len;
     key = (uint8_t *)key_view.buf;
-    //key_len = key_view.len;
+    key_len = key_view.len;
 
     if (ciphersegment_len <= CIPHER_DIFF
 	|| segment_len < ciphersegment_len - CIPHER_DIFF) {
@@ -132,10 +143,19 @@ crypt4gh_chacha20poly1305_decrypt(PyObject* self, PyObject* args)
       goto bailout;
     }
 
-    if(crypto_aead_chacha20poly1305_ietf_decrypt(segment, &slen,
+    if (key_len != crypto_aead_chacha20poly1305_ietf_KEYBYTES) {
+      PyErr_SetString(PyExc_ValueError, "Invalid key size");
+      goto bailout;
+    }
+
+    Py_BEGIN_ALLOW_THREADS
+    rc = crypto_aead_chacha20poly1305_ietf_decrypt(segment, &slen,
 						 NULL,
 						 ciphersegment + NONCE_LEN, ciphersegment_len - NONCE_LEN,
-						 NULL, 0, ciphersegment /* nonce */, key) != 0){
+						 NULL, 0, ciphersegment /* nonce */, key);
+    Py_END_ALLOW_THREADS
+
+    if(rc != 0){
       PyErr_SetString(PyExc_ValueError, "Ciphersegment decryption failed");
       goto bailout;
     }
@@ -202,6 +222,7 @@ crypt4gh_kx_server(PyObject* self, PyObject* args)
 				     server_secret_key,
 				     client_public_key) != 0){
       PyErr_SetString(PyExc_ValueError, "Server session key generation failed.");
+      goto bailout;
     }
 
     ret = PyBytes_FromStringAndSize((const char*)shared_key, crypto_kx_SESSIONKEYBYTES);
@@ -236,7 +257,7 @@ crypt4gh_kx_client(PyObject* self, PyObject* args)
 			  &client_secret_key_obj,
 			  &server_public_key_obj)) {
       PyErr_SetString(PyExc_TypeError, "All arguments must be buffer objects");
-      Py_RETURN_NONE;
+      return NULL;
     }
 
     if (PyObject_GetBuffer(client_public_key_obj, &client_public_key_view, PyBUF_SIMPLE) != 0 ||
@@ -265,6 +286,7 @@ crypt4gh_kx_client(PyObject* self, PyObject* args)
 				     client_secret_key,
 				     server_public_key) != 0){
       PyErr_SetString(PyExc_ValueError, "Client session key generation failed.");
+      goto bailout;
     }
 
     ret = PyBytes_FromStringAndSize((const char*)shared_key, crypto_kx_SESSIONKEYBYTES);
