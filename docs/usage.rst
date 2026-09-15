@@ -35,6 +35,6 @@ The usual ``-h`` flag shows you the different options that the tool accepts.
         C4GH_SECRET_KEY  If defined, it will be used as the default secret key (ie --sk ${{C4GH_SECRET_KEY}})
         C4GH_PASSPHRASE  If defined, it will be used as the passphrase
                          for decoding the secret key, replacing the callback.
-                         Note: this is insecure.
+                         Other users cannot read it; your own processes and root can.
         C4GH_DEBUG       If True, it will print (a lot of) debug information.
                          Note: the output might contain secrets
