@@ -49,7 +49,7 @@ Environment variables:
    C4GH_SECRET_KEY  If defined, it will be used as the default secret key (ie --sk ${{C4GH_SECRET_KEY}})
    C4GH_PASSPHRASE  If defined, it will be used as the passphrase
                     for decoding the secret key, replacing the callback.
-                    Note: this is insecure. Only used for testing
+                    Other users cannot read it; your own processes and root can.
    C4GH_DEBUG       If True, it will print (a lot of) debug information.
                     (Watch out: the output contains secrets)
  
@@ -111,8 +111,6 @@ def retrieve_private_key(args, generate=False):
 
     passphrase = os.getenv('C4GH_PASSPHRASE')
     if passphrase:
-        #LOG.warning("Using a passphrase in an environment variable is insecure")
-        print("Warning: Using a passphrase in an environment variable is insecure", file=sys.stderr)
         cb = lambda : passphrase
     else:
         cb = partial(getpass, prompt=f'Passphrase for {seckey}: ')

@@ -81,8 +81,6 @@ def output(args):
 
     passphrase = os.getenv('C4GH_PASSPHRASE')
     if passphrase:
-        #LOG.warning("Using a passphrase in an environment variable is insecure")
-        print("Warning: Using a passphrase in an environment variable is insecure", file=sys.stderr)
         cb = lambda : passphrase
     else:
         cb = partial(getpass, prompt=f'Passphrase for {seckey}: ')
