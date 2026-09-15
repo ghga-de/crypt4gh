@@ -55,6 +55,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Build the source distribution (the tests run on what users install)
+      run: |
+        pip install build
+        python -m build --sdist
+
     - name: Install Crypt4GH with system-wide libsodium (macOS)
       if: matrix.os == 'macos-latest' && matrix.install == 'system'
       run: |
@@ -62,7 +67,7 @@ jobs:
         export SODIUM_INSTALL=system
         export CFLAGS="$(pkg-config --cflags libsodium)"
         export LDFLAGS="$(pkg-config --libs libsodium)"
-        pip install . --no-cache-dir
+        pip install dist/crypt4gh-*.tar.gz --no-cache-dir
 
     - name: Install Crypt4GH with system-wide libsodium (Ubuntu)
       if: matrix.os == 'ubuntu-latest' && matrix.install == 'system'
@@ -72,12 +77,12 @@ jobs:
         export SODIUM_INSTALL=system
         export CFLAGS="$(pkg-config --cflags libsodium)"
         export LDFLAGS="$(pkg-config --libs libsodium)"
-        pip install . --no-cache-dir
+        pip install dist/crypt4gh-*.tar.gz --no-cache-dir
 
     - name: Install package (bundled)
       if: matrix.install != 'system'
       run: |
-        pip install . --no-cache-dir
+        pip install dist/crypt4gh-*.tar.gz --no-cache-dir
 
     - name: Install bats (macOS)
       if: matrix.os == 'macos-latest'
