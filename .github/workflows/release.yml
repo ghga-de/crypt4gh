@@ -8,63 +8,16 @@ on:
       - test-[0-9]+.*
 
 jobs:
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      matrix:
-        include:
-          - os: linux-intel
-            runs-on: ubuntu-latest
-          - os: linux-arm
-            runs-on: ubuntu-24.04-arm
-          - os: macos-intel
-            # macos-15-intel is the last x86_64 runner
-            runs-on: macos-15-intel
-          - os: macos-arm
-            # macos-14+ (including latest) are ARM64 runners
-            runs-on: macos-latest
-          # - os: windows-intel
-          #   runs-on: windows-latest
-          # - os: windows-arm
-          #   runs-on: windows-11-arm
-
-        # build: ["cp39-* cp310-* cp311-* cp312-* cp313-* cp314-*"]
-
-    steps:
-      - name: Checkout crypt4gh (with the bundled libsodium)
-        uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          persist-credentials: false
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v3.4.1
-        env:
-          CIBW_PLATFORM: 'auto'
-          CIBW_ARCHS: 'auto' # native
-          CIBW_BUILD_VERBOSITY: 1
-        # with:
-        #   package-dir: .
-        #   output-dir: wheelhouse
-        #   config-file: "{package}/pyproject.toml"
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
-
-
-  build_sdist:
+  build:
     runs-on: ubuntu-latest
     env:
       job_python_version: "3.14"
 
     steps:
-      - name: Checkout crypt4gh (with the bundled libsodium)
+      - name: Checkout crypt4gh
         uses: actions/checkout@v6
         with:
-          submodules: recursive
+          persist-credentials: false
 
       - name: Set up Python ${{ env.job_python_version }}
         uses: actions/setup-python@v6
@@ -76,19 +29,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install build
 
-      - name: Create source distribution
-        run:  python -m build --sdist
+      - name: Create source distribution and wheel
+        run:  python -m build
 
-      - name: Upload sdist artifact
+      - name: Upload distribution artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: sdist
-          path: dist/crypt4gh-*.tar.gz
+          name: dist
+          path: dist/crypt4gh-*
 
 
   publish-to-testpypi:
     if: github.ref_type == 'tag' && startsWith(github.ref_name, 'test-')
-    needs: [build_wheels, build_sdist]
+    needs: [build]
     runs-on: ubuntu-latest
 
     environment:
@@ -112,7 +65,7 @@ jobs:
 
   publish-to-pypi:
     if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
-    needs: [build_wheels, build_sdist]
+    needs: [build]
     runs-on: ubuntu-latest
 
     environment:

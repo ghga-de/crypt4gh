@@ -9,7 +9,6 @@ include crypt4gh/completions/*.sh
 include LICENSE
 include README.md
 include requirements.txt
-include build_libsodium.py
 
 global-exclude __pycache__
 

@@ -14,7 +14,7 @@ requires-python = ">=3.9"
 # See https://packaging.python.org/discussions/install-requires-vs-requirements/
 dependencies = [ # include version when needed
     "docopt-ng",
-    "cryptography>=2.8",
+    "cryptography>=47", # for ChaCha20Poly1305.encrypt_into and decrypt_into
     "bcrypt",
 ]
 classifiers = [
@@ -59,15 +59,6 @@ crypt4gh = "crypt4gh.__main__:main"
 crypt4gh-keygen = "crypt4gh.keys.__main__:main"
 crypt4gh-completions = "crypt4gh.completions.__main__:main"
 
-[tool.setuptools]
-# Builds the bundled libsodium first, unless SODIUM_INSTALL=system
-cmdclass = { build_ext = "build_libsodium.BuildLibsodium" }
-
 [tool.setuptools.packages.find]
 include = ["crypt4gh", "crypt4gh.*"]
 namespaces = false
-
-[[tool.setuptools.ext-modules]]
-name = "crypt4gh.sodium"
-sources = ["crypt4gh/sodium.c"]
-libraries = ["sodium"]
