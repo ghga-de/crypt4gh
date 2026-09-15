@@ -16,7 +16,7 @@ use_system_sodium = os.environ.get('SODIUM_INSTALL') == 'system'
 
 include_dirs=[]
 library_dirs=[]
-libraries=[]
+libraries=['sodium']
 extra_compile_args = []
 extra_link_args = []
 
@@ -28,7 +28,6 @@ if not use_system_sodium:
 
     include_dirs=[str(LIBSODIUM_BUILD / 'include')]
     library_dirs=[str(LIBSODIUM_BUILD / 'lib')]
-    libraries=['sodium']
     if sys.platform == "darwin":
         extra_compile_args = ['-fPIC','-dead_strip']
         extra_link_args = ['-fPIC','-dead_strip', '-Xlinker', '-dead_strip_dylibs']

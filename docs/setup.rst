@@ -33,12 +33,11 @@ For that, you set the following environment variables before running ``pip insta
     # If libsodium is not installed in default locations,
     # you need to adjust CFLAGS and LDFLAGS:
     export CFLAGS="-I/path/to/libsodium/include"
-    export LDFLAGS="-L/path/to/libsodium/lib -lsodium"
+    export LDFLAGS="-L/path/to/libsodium/lib"
     
     # For example, using pkg-config
     export CFLAGS="$(pkg-config --cflags libsodium)"
-    export LDFLAGS="$(pkg-config --libs libsodium)"                    # on macos
-    export LDFLAGS="-Wl,--no-as-needed $(pkg-config --libs libsodium)" # on linux
+    export LDFLAGS="$(pkg-config --libs-only-L libsodium)"
 
     # and finally:
     pip install ./crypt4gh
@@ -48,7 +47,7 @@ For that, you set the following environment variables before running ``pip insta
 
    The compiler on macOS is more agressive and restricts the compilation to only the functions it uses from libsodium. This creates a smaller **crypt4gh** module.
 
-   On Linux, it is more conservative and keeps *all* libsodium functions, and therefore produces a bigger module. It seems that you also need to pass ``-Wl,--no-as-needed``, on Linux, to the linker (ie add it in LDFLAGS) to resolve symbols in the python module.
+   On Linux, it is more conservative and keeps *all* libsodium functions, and therefore produces a bigger module.
 
    Help me out if you know how to resolve that.
 
