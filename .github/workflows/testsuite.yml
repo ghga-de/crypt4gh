@@ -29,18 +29,9 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
-        install: ['system', 'bundled']
 
     steps:
-    - name: Checkout repository (with libsodium submodule)
-      if: matrix.install == 'bundled'
-      uses: actions/checkout@v6
-      with:
-        submodules: recursive
-        persist-credentials: false
-
-    - name: Checkout repository (with system-wide libsodium)
-      if: matrix.install != 'bundled'
+    - name: Checkout repository
       uses: actions/checkout@v6
       with:
         persist-credentials: false
@@ -60,27 +51,7 @@ jobs:
         pip install build
         python -m build --sdist
 
-    - name: Install Crypt4GH with system-wide libsodium (macOS)
-      if: matrix.os == 'macos-latest' && matrix.install == 'system'
-      run: |
-        brew install pkg-config libsodium
-        export SODIUM_INSTALL=system
-        export CFLAGS="$(pkg-config --cflags libsodium)"
-        export LDFLAGS="$(pkg-config --libs libsodium)"
-        pip install dist/crypt4gh-*.tar.gz --no-cache-dir
-
-    - name: Install Crypt4GH with system-wide libsodium (Ubuntu)
-      if: matrix.os == 'ubuntu-latest' && matrix.install == 'system'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y pkg-config libsodium-dev
-        export SODIUM_INSTALL=system
-        export CFLAGS="$(pkg-config --cflags libsodium)"
-        export LDFLAGS="$(pkg-config --libs libsodium)"
-        pip install dist/crypt4gh-*.tar.gz --no-cache-dir
-
-    - name: Install package (bundled)
-      if: matrix.install != 'system'
+    - name: Install package
       run: |
         pip install dist/crypt4gh-*.tar.gz --no-cache-dir
 

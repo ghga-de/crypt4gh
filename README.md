@@ -18,7 +18,7 @@ Install it from PyPI:
 pip install crypt4gh
 ```
 
-or [compile and install it from the latest sources](#compilation-from-sources)
+or [install it from the latest sources](#installation-from-sources)
 
 
 ## Usage
@@ -83,31 +83,14 @@ $ crypt4gh decrypt --sk alice.sec < file.c4gh
 
 Refer to the [specifications](http://samtools.github.io/hts-specs/crypt4gh.pdf) or this [documentation](https://crypt4gh.readthedocs.io/en/latest/encryption.html).
 
-## Compilation from sources
+## Installation from sources
 
 Get the source code, and install the python dependencies with:
 
 ```
-git clone --recursive https://github.com/EGA-archive/crypt4gh
+git clone https://github.com/EGA-archive/crypt4gh
 pip install -r crypt4gh/requirements.txt
 ```
-
-The Crypt4GH python package relies on
-[libsodium](https://libsodium.org), a portable C library. A copy is
-bundled with Crypt4GH as a submodule. You can either use the version
-of libsodium already installed on your system (eg, provided by your
-distribution), or use the bundled version.
-
-For the system-wide version, you use the `SODIUM_INSTALL=system` environment variable. You might also need to adjust the `CFLAGS` and `LDFLAGS` environment variables. For example, using `pkg-config` to find the libsodium headers and library, you can use:
-
-```
-export SODIUM_INSTALL=system
-# If not installed in default locations
-export CFLAGS="$(pkg-config --cflags libsodium)"
-export LDFLAGS="$(pkg-config --libs libsodium)"
-```
-
-If you want to use the bundled version, skip those environment variables.
 
 Finally, run
 

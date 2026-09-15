@@ -9,11 +9,11 @@ The sources for EGA cryptor can be downloaded and installed from the `EGA-archiv
 
     pip install crypt4gh
 
-or compile/install it from sources:
+or install it from sources:
 
 .. code-block:: console
 
-   git clone --recursive https://github.com/EGA-archive/crypt4gh
+   git clone https://github.com/EGA-archive/crypt4gh
    pip install -r crypt4gh/requirements.txt
    pip install ./crypt4gh
    #
@@ -22,37 +22,7 @@ or compile/install it from sources:
    pip install git+https://github.com/EGA-archive/crypt4gh.git
 
 
-The above will use a version of `libsodium`_ bundled in the repository as a submodule (hence cloning with ``--recursive``).
-You have the possibility to use the version of libsodium already installed on your system.
-For that, you set the following environment variables before running ``pip install``.
-
-.. code-block:: console
-
-    export SODIUM_INSTALL=system
-
-    # If libsodium is not installed in default locations,
-    # you need to adjust CFLAGS and LDFLAGS:
-    export CFLAGS="-I/path/to/libsodium/include"
-    export LDFLAGS="-L/path/to/libsodium/lib"
-    
-    # For example, using pkg-config
-    export CFLAGS="$(pkg-config --cflags libsodium)"
-    export LDFLAGS="$(pkg-config --libs-only-L libsodium)"
-
-    # and finally:
-    pip install ./crypt4gh
-
-
-.. note::
-
-   The compiler on macOS is more agressive and restricts the compilation to only the functions it uses from libsodium. This creates a smaller **crypt4gh** module.
-
-   On Linux, it is more conservative and keeps *all* libsodium functions, and therefore produces a bigger module.
-
-   Help me out if you know how to resolve that.
-
 .. _EGA-archive Github repo: https://github.com/EGA-archive/crypt4gh
-.. _libsodium: https://libsodium.org
 
 ----
 
