@@ -54,7 +54,6 @@ CFLAGS and LDFLAGS may be needed.
         cmd = ['./configure',
                '--prefix', str(LIBSODIUM_BUILD),
                '--enable-minimal',
-               '--enable-opt', # since we install it on the machine
                '--disable-shared',
                '--enable-static',
                '--enable-pic',
