@@ -10,7 +10,7 @@
 
 ## Installation
 
-Python `3.6+` required to use the crypt4gh encryption utility.
+Python `3.9+` required to use the crypt4gh encryption utility.
 
 Install it from PyPI:
 
