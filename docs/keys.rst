@@ -2,6 +2,8 @@
 
    This utility supports OpenSSH key-format (version 6.5 or above) if the key was generated with type ``ed25519`` (ie with ``ssh-keygen -t ed25519 ...``).
 
+   An encrypted OpenSSH private key must use ``aes256-ctr`` (what ``ssh-keygen`` uses by default), ``aes256-cbc`` or ``aes256-gcm@openssh.com``. Re-encrypt other keys with ``ssh-keygen -p -Z aes256-ctr -f <keyfile>``.
+
    Otherwise, this utility can generate keys in the following format...
 
 
