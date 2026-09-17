@@ -14,7 +14,7 @@ from getpass import getpass
 
 from crypt4gh.keys import get_private_key, get_public_key
 from crypt4gh import header, lib, SEGMENT_SIZE
-from crypt4gh.lib import sodium
+from crypt4gh.lib import crypto
 
 if __name__ == '__main__':
 
@@ -96,7 +96,7 @@ if __name__ == '__main__':
         if segment_len == 0: # finito
             break
 
-        clen = sodium.chacha20poly1305_encrypt(ciphersegment,
+        clen = crypto.chacha20poly1305_encrypt(ciphersegment,
                                                segment[:segment_len],
                                                memoryview(session_key))
         outfile.write(ciphersegment[:clen])

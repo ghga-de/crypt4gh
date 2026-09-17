@@ -7,7 +7,7 @@ import stat
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
 from .kdf import derive_key, get_kdf, scrypt_supported, KDFS
-from .. import sodium, exceptions
+from .. import crypto, exceptions
 
 LOG = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ def generate(seckey, pubkey, passphrase, comment):
 
     with open(pubkey, 'bw', ) as f:
         f.write(b'-----BEGIN CRYPT4GH PUBLIC KEY-----\n')
-        pkey = sodium.derive_pk(sk)
+        pkey = crypto.derive_pk(sk)
         LOG.debug('Public Key: %s', pkey.hex().upper())
         f.write(b64encode(pkey))
         f.write(b'\n-----END CRYPT4GH PUBLIC KEY-----\n')

@@ -6,7 +6,7 @@ import logging
 from itertools import chain
 # from types import GeneratorType
 
-from . import sodium, SEGMENT_SIZE, VERSION, CIPHER_DIFF
+from . import crypto, SEGMENT_SIZE, VERSION, CIPHER_DIFF
 
 LOG = logging.getLogger(__name__)
 
@@ -164,7 +164,7 @@ def parse_edit_list_packet(packet):
 def encrypt_X25519_Chacha20_Poly1305(data, seckey, recipient_pubkey):
     '''Computes the encrypted part'''
 
-    pubkey = sodium.derive_pk(seckey)
+    pubkey = crypto.derive_pk(seckey)
 
     #LOG.debug('Original data: %s', data.hex())
     LOG.debug("         Packet data: %s", data.hex())
@@ -173,13 +173,13 @@ def encrypt_X25519_Chacha20_Poly1305(data, seckey, recipient_pubkey):
     LOG.debug('recipient public key: %s', recipient_pubkey.hex())
 
     # X25519 shared key
-    shared_key = sodium.kx_server(pubkey, seckey, recipient_pubkey)
+    shared_key = crypto.kx_server(pubkey, seckey, recipient_pubkey)
     LOG.debug('shared key: %s', shared_key.hex())
 
     encrypted_data = bytearray(len(data) + CIPHER_DIFF)
 
     # Chacha20_Poly1305 (including nonce)
-    clen = sodium.chacha20poly1305_encrypt(encrypted_data, data, shared_key)
+    clen = crypto.chacha20poly1305_encrypt(encrypted_data, data, shared_key)
     return pubkey + encrypted_data[:clen]
 
 def decrypt_X25519_Chacha20_Poly1305(encrypted_part, privkey, sender_pubkey=None):
@@ -199,12 +199,12 @@ def decrypt_X25519_Chacha20_Poly1305(encrypted_part, privkey, sender_pubkey=None
     LOG.debug('encrypted data: %s', packet_data.hex())
 
     # X25519 shared key
-    pubkey = sodium.derive_pk(privkey)
-    shared_key = sodium.kx_client(pubkey, privkey, peer_pubkey)
+    pubkey = crypto.derive_pk(privkey)
+    shared_key = crypto.kx_client(pubkey, privkey, peer_pubkey)
     LOG.debug('shared key: %s', shared_key.hex())
 
     decrypted_data = bytearray(len(packet_data)) # larger then needed
-    plen = sodium.chacha20poly1305_decrypt(decrypted_data, encrypted_part[32:], shared_key)
+    plen = crypto.chacha20poly1305_decrypt(decrypted_data, encrypted_part[32:], shared_key)
     return decrypted_data[:plen]
 
 

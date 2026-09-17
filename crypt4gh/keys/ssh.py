@@ -3,7 +3,7 @@ import logging
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 from cryptography.hazmat.primitives.serialization import load_ssh_private_key, load_ssh_public_key
 
-from .. import sodium
+from .. import crypto
 from ..exceptions import exit_on_invalid_passphrase
 
 LOG = logging.getLogger(__name__)
@@ -32,12 +32,12 @@ def parse_private_key(data, callback):
 
     sk = key.private_bytes_raw()
     pk = key.public_key().public_bytes_raw()
-    return (sodium.sign_ed25519_sk_to_curve25519(sk + pk),
-            sodium.sign_ed25519_pk_to_curve25519(pk))
+    return (crypto.sign_ed25519_sk_to_curve25519(sk + pk),
+            crypto.sign_ed25519_pk_to_curve25519(pk))
 
 
 def get_public_key(line):
     key = load_ssh_public_key(line)
     if not isinstance(key, Ed25519PublicKey):
         raise NotImplementedError(f'Unsupported SSH key format: {line[0:11]}')
-    return sodium.sign_ed25519_pk_to_curve25519(key.public_bytes_raw())
+    return crypto.sign_ed25519_pk_to_curve25519(key.public_bytes_raw())

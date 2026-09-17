@@ -10,7 +10,7 @@ from . import SEGMENT_SIZE, CIPHER_DIFF, CIPHER_SEGMENT_SIZE
 from .exceptions import close_on_broken_pipe
 from . import header
 
-from . import sodium
+from . import crypto
 
 LOG = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ def encrypt(keys, infile, outfile, headerfile=None, offset=0, span=None):
             break
 
         dlen = min(span, segment_len) if span else segment_len
-        clen = sodium.chacha20poly1305_encrypt(ciphersegment, segment[:dlen], session_key)
+        clen = crypto.chacha20poly1305_encrypt(ciphersegment, segment[:dlen], session_key)
         outfile.write(ciphersegment[:clen])
 
         if span is not None:
@@ -119,7 +119,7 @@ def decrypt_block(segment, ciphersegment, session_keys):
     # So... LRU solution. For now, try them as they come.
     for key in session_keys:
         try:
-            return sodium.chacha20poly1305_decrypt(segment, ciphersegment, key)
+            return crypto.chacha20poly1305_decrypt(segment, ciphersegment, key)
         except Exception as e:
             LOG.error('Decryption failed: %s', e)
     else: # no cipher worked: Bark!

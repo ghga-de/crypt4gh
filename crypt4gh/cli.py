@@ -12,7 +12,7 @@ import json
 from docopt import docopt
 
 from . import __title__, __version__, PROG
-from . import lib, sodium
+from . import lib, crypto
 from .keys import get_public_key, get_private_key
 
 LOG = logging.getLogger(__name__)
@@ -183,7 +183,7 @@ def rearrange(args):
     range_start, range_span = parse_range(args)
 
     seckey = retrieve_private_key(args)
-    pubkey = sodium.derive_pk(seckey)
+    pubkey = crypto.derive_pk(seckey)
 
     keys = [(0, seckey, pubkey)] # keys = list of (method, privkey, recipient_pubkey=ourselves)
 
