@@ -33,3 +33,6 @@ sphinx:
 python:
   install:
     - requirements: docs/requirements.txt
+    # autodoc imports the package, so it must be installed
+    - method: pip
+      path: .
