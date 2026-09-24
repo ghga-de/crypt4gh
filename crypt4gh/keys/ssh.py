@@ -1,3 +1,4 @@
+import base64
 import logging
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
@@ -12,15 +13,22 @@ MAGIC_WORD = b'openssh-key-v1\x00'
 
 
 @exit_on_invalid_passphrase
-def parse_private_key(data, callback):
-    '''Parse an OpenSSH ed25519 private key, given in PEM format.
+def parse_private_key(stream, callback):
+    '''Parse an OpenSSH ed25519 private key.
+
+    The stream holds the key decoded from PEM.
+    get_private_key has already read the MAGIC_WORD from it.
 
     The callback is only asked for the passphrase if the key is encrypted.
     Returns the X25519 secret key and public key.'''
 
+    # cryptography only reads the PEM format, so wrap the key in it again
+    data = (b'-----BEGIN OPENSSH PRIVATE KEY-----\n'
+            + base64.encodebytes(MAGIC_WORD + stream.read())
+            + b'-----END OPENSSH PRIVATE KEY-----\n')
     try:
         key = load_ssh_private_key(data, password=None)
-    except TypeError: # the key is encrypted
+    except TypeError: # the key is encrypted; data is always bytes here
         assert( callback and callable(callback) )
         passphrase = callback().encode()
         if not passphrase:

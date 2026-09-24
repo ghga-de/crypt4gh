@@ -77,7 +77,6 @@ def get_private_key(filepath, callback):
     magic_word += stream.read(len(ssh.MAGIC_WORD)-len(c4gh.MAGIC_WORD))
     if magic_word == ssh.MAGIC_WORD: # It's an SSH key
         LOG.info('Loading an OpenSSH private key')
-        with open(filepath, 'rb') as f: # cryptography parses the PEM itself
-            return ssh.parse_private_key(f.read(), callback)[0] # we also return the pubkey
+        return ssh.parse_private_key(stream, callback)[0] # we also return the pubkey
     
     raise ValueError('Invalid key format')
